@@ -19,7 +19,8 @@ async def infer(
     f0_method: str = Form("rmvpe"),       # "rmvpe" / "harvest" / "dio" など
     index_rate: float = Form(0.7),
 ):
-    if not file.filename.lower().endswith((".wav", ".flac", ".mp3", ".ogg", ".m4a")):
+    filename = file.filename or ""
+    if not filename.lower().endswith((".wav", ".flac", ".mp3", ".ogg", ".m4a")):
         raise HTTPException(400, "audio file required")
 
     models_dir = os.environ.get("RVC_MODELS_DIR", "/models")

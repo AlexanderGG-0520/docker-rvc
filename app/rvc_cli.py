@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import wave
 
 def main():
     ap = argparse.ArgumentParser()
@@ -48,9 +49,21 @@ def main():
     # numpy配列だった場合
     try:
         import numpy as np
-        import soundfile as sf
         if isinstance(wav, np.ndarray):
-            sf.write(args.output, wav, 48000)
+            audio = wav
+            if audio.ndim > 1:
+                audio = np.mean(audio, axis=1)
+            if np.issubdtype(audio.dtype, np.floating):
+                audio = np.clip(audio, -1.0, 1.0)
+                audio = (audio * 32767.0).astype(np.int16)
+            elif audio.dtype != np.int16:
+                audio = audio.astype(np.int16)
+
+            with wave.open(args.output, "wb") as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(2)
+                wf.setframerate(48000)
+                wf.writeframes(audio.tobytes())
             return
     except Exception:
         pass
